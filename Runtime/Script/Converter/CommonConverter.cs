@@ -13,6 +13,10 @@ namespace Aya.DataBinding
             {
                 return data;
             }
+            else if (convertType.IsAssignableFrom(dataType))
+            {
+                return data;
+            }
             else if (convertType == typeof(string))
             {
                 var convertData = data.ToString();
