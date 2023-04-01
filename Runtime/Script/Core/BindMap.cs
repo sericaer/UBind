@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace Aya.DataBinding
 {
@@ -56,7 +57,7 @@ namespace Aya.DataBinding
 
         #region Bind / UnBind
 
-        public static void Bind(object target)
+        public static void Bind(object target, string contextString = null)
         {
             var bindMap = GetBindMap(target);
             foreach (var kv in bindMap.PropertyInfos)
@@ -64,9 +65,11 @@ namespace Aya.DataBinding
                 var propertyInfo = kv.Key;
                 var bindAttribute = kv.Value;
 
-                var context = bindAttribute.Context;
+                var context = contextString != null ? contextString : bindAttribute.Context;
                 var key = bindAttribute.Key;
                 var direction = bindAttribute.Direction;
+
+                Debug.Log($"context = {context}");
 
                 if (bindAttribute is BindValueAttribute)
                 {
@@ -87,9 +90,11 @@ namespace Aya.DataBinding
                 var fieldInfo = kv.Key;
                 var bindAttribute = kv.Value;
 
-                var context = bindAttribute.Context;
+                var context = contextString != null ? contextString : bindAttribute.Context;
                 var key = bindAttribute.Key;
                 var direction = bindAttribute.Direction;
+
+                Debug.Log($"context = {context}");
 
                 if (bindAttribute is BindValueAttribute)
                 {

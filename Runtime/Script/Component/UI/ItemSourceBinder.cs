@@ -27,6 +27,11 @@ namespace Aya.DataBinding
 
             return dataBinder;
         }
+
+        public override void Awake()
+        {
+            ItemTemplate.SetActive(false);
+        }
     }
 
     public class RuntimeItemSourceBinder : DataBinder<LayoutGroup, IEnumerable<object>>
@@ -71,21 +76,62 @@ namespace Aya.DataBinding
             {
                 if(!itemData2Obj.ContainsKey(item))
                 {
-                    itemData2Obj.Add(item, Object.Instantiate(ItemTemplate, ItemTemplate.transform.parent));
+                    var instance = Object.Instantiate(ItemTemplate, ItemTemplate.transform.parent) as GameObject;
+                    itemData2Obj.Add(item, instance);
+
+                    var contextString = instance.GetInstanceID().ToString();
+                    UpdateUIComponentContextString(contextString, instance);
+
+                    instance.SetActive(true);
+
+                    BindMap.Bind(item, contextString);
                 }
             }
 
-            foreach(var key in itemData2Obj.Keys)
+            for(int i=0; i<itemData2Obj.Count; i++)
             {
-                if(!_items.Contains(key))
+                var pair = itemData2Obj.ElementAt(i);
+
+                if (!_items.Contains(pair.Key))
                 {
-                    Object.Destroy(itemData2Obj[key]);
-                    itemData2Obj.Remove(key);
+                    Object.Destroy(itemData2Obj[pair.Key]);
+                    itemData2Obj.Remove(pair.Key);
+                    BindMap.UnBind(pair.Key);
                 }
-            }    
+
+            }  
         }
 
         private IEnumerable<object> _items;
+
+
+        private static void UpdateUIComponentContextString(string contextStr, GameObject gameObject)
+        {
+            var componentBinders = gameObject.GetComponentsInChildren<ComponentBinderBase>();
+            foreach (var binder in componentBinders)
+            {
+                binder.Context = gameObject.GetInstanceID().ToString();
+                Debug.Log("Change binder.Context");
+            }
+        }
+
+        private static void UpdateItemContextString(string contextStr, object item)
+        {
+            var bindMap = BindMap.GetBindMap(item);
+            foreach (var kv in bindMap.PropertyInfos)
+            {
+                kv.Value.Context = contextStr;
+
+                Debug.Log($"kv.Value.Context = {kv.Value.Context}");
+            }
+
+            foreach (var kv in bindMap.FieldInfos)
+            {
+                kv.Value.Context = contextStr;
+
+                Debug.Log($"kv.Value.Context = {kv.Value.Context}");
+            }
+        }
     }
 
 #if UNITY_EDITOR

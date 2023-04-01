@@ -2,14 +2,19 @@
 
 namespace Aya.DataBinding
 {
-    public abstract class ComponentBinder<TComponent, TValue, TDataBinder> : MonoBehaviour
-        where TDataBinder : DataBinder<TComponent, TValue>, new()
-        where TComponent : Component
+    public abstract class ComponentBinderBase : MonoBehaviour
     {
         public string Context = DataContext.Default;
         public string Key;
         public DataDirection Direction = DataDirection.Target;
         public UpdateType UpdateType = UpdateType.Update;
+    }
+
+    public abstract class ComponentBinder<TComponent, TValue, TDataBinder> : ComponentBinderBase
+        where TDataBinder : DataBinder<TComponent, TValue>, new()
+        where TComponent : Component
+    {
+
         public TComponent Target;
 
         public TDataBinder DataBinder { get; internal set; }
@@ -52,6 +57,8 @@ namespace Aya.DataBinding
                 UpdateType = UpdateType,
                 Key = Key
             };
+
+            Debug.Log("CreateDataBinder");
 
             return dataBinder;
         }
